@@ -1,6 +1,6 @@
 from datetime import datetime, date
 
-from sqlalchemy import String, Float, Integer, DateTime, Date, ForeignKey, Text
+from sqlalchemy import String, Float, Integer, BigInteger, DateTime, Date, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -38,7 +38,7 @@ class AdSpend(Base):
 class Order(Base):
     __tablename__ = "orders"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)  # ML order id
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)  # ML order id
     date_created: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=True)
     total_amount: Mapped[float] = mapped_column(Float, default=0.0)
@@ -55,7 +55,7 @@ class OrderItem(Base):
     __tablename__ = "order_items"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"), nullable=False)
     item_id: Mapped[str] = mapped_column(String, nullable=True)
     title: Mapped[str] = mapped_column(String, nullable=True)
     sku: Mapped[str] = mapped_column(String, nullable=True, index=True)
