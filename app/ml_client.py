@@ -167,7 +167,8 @@ def update_item(access_token: str, item_id: str, payload: dict) -> dict:
         json=payload,
         timeout=30,
     )
-    resp.raise_for_status()
+    if resp.status_code >= 400:
+        raise Exception(f"Mercado Livre recusou a alteração: {resp.text}")
     return resp.json()
 
 

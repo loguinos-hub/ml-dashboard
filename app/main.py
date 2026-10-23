@@ -419,6 +419,7 @@ def edit_item_form(request: Request, item_id: str, db: Session = Depends(get_db)
 
 @app.post("/items/{item_id}/edit")
 def edit_item(
+    request: Request,
     item_id: str,
     price: float = Form(...),
     available_quantity: int = Form(...),
@@ -430,7 +431,15 @@ def edit_item(
     payload = {"price": price, "available_quantity": available_quantity}
     if sku:
         payload["seller_custom_field"] = sku
-    ml_client.update_item(auth.access_token, item_id, payload)
+    try:
+        ml_client.update_item(auth.access_token, item_id, payload)
+    except Exception as exc:
+        item = ml_client.get_item(auth.access_token, item_id)
+        return templates.TemplateResponse(request, "item_edit.html", {
+            "item": item,
+            "cost": None,
+            "error": str(exc),
+        }, status_code=400)
 
     if sku and cost_price.strip():
         cost_value = float(cost_price)
