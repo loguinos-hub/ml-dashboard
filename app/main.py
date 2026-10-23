@@ -1,18 +1,43 @@
+import secrets
 from collections import defaultdict
 from datetime import datetime, date, timedelta
 
 from fastapi import FastAPI, Request, Depends, Form
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app import ml_client
+from app.config import BASIC_AUTH_USER, BASIC_AUTH_PASS
 from app.database import get_db, init_db
 from app.models import MLAuth, Order, OrderItem, ProductCost, AdSpend
 
 app = FastAPI(title="Painel Mercado Livre")
 templates = Jinja2Templates(directory="app/templates")
+
+
+@app.middleware("http")
+async def basic_auth_middleware(request: Request, call_next):
+    if not BASIC_AUTH_USER or not BASIC_AUTH_PASS:
+        return await call_next(request)
+
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Basic "):
+        import base64
+        try:
+            decoded = base64.b64decode(auth_header.split(" ", 1)[1]).decode("utf-8")
+            user, _, password = decoded.partition(":")
+        except Exception:
+            user, password = "", ""
+        if secrets.compare_digest(user, BASIC_AUTH_USER) and secrets.compare_digest(password, BASIC_AUTH_PASS):
+            return await call_next(request)
+
+    return Response(
+        status_code=401,
+        headers={"WWW-Authenticate": "Basic realm=\"Painel Mercado Livre\""},
+        content="Autenticação necessária",
+    )
 
 try:
     app.mount("/static", StaticFiles(directory="app/static"), name="static")
