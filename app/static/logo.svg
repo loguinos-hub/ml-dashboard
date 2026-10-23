@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" width="220" height="56">
+  <rect x="0" y="4" width="48" height="48" rx="12" fill="#fff159"/>
+  <path d="M12 38 L20 28 L27 33 L36 18" stroke="#2d3277" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="36" cy="18" r="3.5" fill="#3483fa"/>
+  <circle cx="27" cy="33" r="3.5" fill="#3483fa"/>
+  <circle cx="20" cy="28" r="3.5" fill="#3483fa"/>
+  <circle cx="12" cy="38" r="3.5" fill="#3483fa"/>
+  <text x="58" y="24" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#2d3277">Painel</text>
+  <text x="58" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#3483fa">Mercado Livre</text>
+</svg>

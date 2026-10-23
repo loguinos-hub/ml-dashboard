@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Painel Mercado Livre</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+</head>
+<body>
+  <nav class="topnav">
+    <a href="/" class="brand"><img src="/static/logo.svg" alt="Painel Mercado Livre" class="logo"></a>
+    <a href="/">Relatório</a>
+    <a href="/sales">Vendas detalhadas</a>
+    <a href="/costs">Custos por SKU</a>
+    <a href="/ads">Investimento em Ads</a>
+    <a href="/items">Anúncios</a>
+    <a href="/auth/logout" class="logout">Sair</a>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

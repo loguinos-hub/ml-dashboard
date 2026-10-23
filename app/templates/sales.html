@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Vendas detalhadas</h1>
+
+<form method="get" action="/sales" class="inline-form">
+  <label>Período:
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" {% if days == 7 %}selected{% endif %}>Últimos 7 dias</option>
+      <option value="30" {% if days == 30 %}selected{% endif %}>Últimos 30 dias</option>
+      <option value="90" {% if days == 90 %}selected{% endif %}>Últimos 90 dias</option>
+      <option value="365" {% if days == 365 %}selected{% endif %}>Último ano</option>
+    </select>
+  </label>
+  <label>Buscar produto/SKU:
+    <input type="text" name="q" value="{{ q }}" placeholder="ex: pokemon">
+  </label>
+  <button class="btn" type="submit">Filtrar</button>
+</form>
+
+{% if custo_desconhecido %}
+<div class="warning">
+  Algumas linhas abaixo têm <strong>custo não cadastrado</strong> — o lucro dessas vendas está
+  contando custo R$ 0,00. <a href="/costs">Cadastre os custos aqui</a> para corrigir.
+</div>
+{% endif %}
+
+<h2>Resumo do período</h2>
+<table class="report">
+  <thead>
+    <tr>
+      <th>Total vendido (R$)</th>
+      <th>Taxas arrecadadas pelo ML (R$)</th>
+      <th>Custo de produto (R$)</th>
+      <th>Investido em Ads (R$)</th>
+      <th>Total investido (R$)</th>
+      <th>Lucro final (R$)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ "%.2f"|format(totals.vendas) }}</td>
+      <td>{{ "%.2f"|format(totals.taxas_ml) }}</td>
+      <td>{{ "%.2f"|format(totals.custo_produto) }}</td>
+      <td>{{ "%.2f"|format(totals.ads) }}</td>
+      <td>{{ "%.2f"|format(totals.investido) }}</td>
+      <td class="{{ 'positive' if totals.lucro >= 0 else 'negative' }}"><strong>{{ "%.2f"|format(totals.lucro) }}</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Venda por venda ({{ rows|length }} linhas)</h2>
+<table class="report">
+  <thead>
+    <tr>
+      <th>Nº do pedido</th>
+      <th>Data/Hora</th>
+      <th>Título do anúncio</th>
+      <th>SKU</th>
+      <th>Qtd</th>
+      <th>Envio</th>
+      <th>Venda (R$)</th>
+      <th>Taxa ML (R$)</th>
+      <th>Custo (R$)</th>
+      <th>Lucro (R$)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.order_id }}</td>
+      <td>{{ row.datetime.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td>{{ row.title }}</td>
+      <td>{{ row.sku or '-' }}</td>
+      <td>{{ row.quantity }}</td>
+      <td>{{ row.shipping_label }}</td>
+      <td>{{ "%.2f"|format(row.venda) }}</td>
+      <td>{{ "%.2f"|format(row.taxa) }}</td>
+      <td>{% if row.custo_sabido %}{{ "%.2f"|format(row.custo_total) }}{% else %}<em>sem custo</em>{% endif %}</td>
+      <td class="{{ 'positive' if row.lucro >= 0 else 'negative' }}">{{ "%.2f"|format(row.lucro) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

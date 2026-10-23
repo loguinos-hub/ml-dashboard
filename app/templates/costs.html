@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Custo dos produtos (por SKU)</h1>
+<p>Cadastre o quanto você paga por cada produto. Isso é usado para calcular o lucro no relatório.</p>
+
+<form method="post" action="/costs" class="form-grid">
+  <label>SKU<input type="text" name="sku" required></label>
+  <label>Nome (opcional)<input type="text" name="title"></label>
+  <label>Custo (R$)<input type="number" step="0.01" name="cost_price" required></label>
+  <button class="btn" type="submit">Salvar</button>
+</form>
+
+<table class="report">
+  <thead>
+    <tr><th>SKU</th><th>Nome</th><th>Custo (R$)</th><th>Atualizado</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for c in costs %}
+    <tr>
+      <td>{{ c.sku }}</td>
+      <td>{{ c.title or '-' }}</td>
+      <td>{{ "%.2f"|format(c.cost_price) }}</td>
+      <td>{{ c.updated_at.strftime('%d/%m/%Y') }}</td>
+      <td>
+        <form method="post" action="/costs/{{ c.id }}/delete" style="display:inline">
+          <button class="btn-link" type="submit">remover</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

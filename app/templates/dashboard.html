@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Relatório diário</h1>
+
+<form method="get" action="/" class="inline-form">
+  <label>Período:
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" {% if days == 7 %}selected{% endif %}>Últimos 7 dias</option>
+      <option value="30" {% if days == 30 %}selected{% endif %}>Últimos 30 dias</option>
+      <option value="90" {% if days == 90 %}selected{% endif %}>Últimos 90 dias</option>
+    </select>
+  </label>
+</form>
+
+<form method="post" action="/sync?days={{ days }}" class="inline-form">
+  <button class="btn" type="submit">Sincronizar pedidos do Mercado Livre</button>
+</form>
+
+{% if missing_cost_skus %}
+<div class="warning">
+  <strong>Atenção:</strong> os SKUs abaixo foram vendidos mas ainda não têm custo cadastrado
+  (o lucro deles está sendo calculado como se o custo fosse R$ 0,00).
+  <a href="/costs">Cadastrar custos agora</a>.
+  <ul>
+    {% for sku in missing_cost_skus %}<li>{{ sku }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if not has_orders %}
+<p>Nenhum pedido sincronizado ainda. Clique em "Sincronizar pedidos" para importar suas vendas.</p>
+{% endif %}
+
+<table class="report">
+  <thead>
+    <tr>
+      <th>Dia</th>
+      <th>Pedidos</th>
+      <th>Unidades</th>
+      <th>Vendas (R$)</th>
+      <th>Taxas ML (R$)</th>
+      <th>Custo produtos (R$)</th>
+      <th>Investido em Ads (R$)</th>
+      <th>Lucro (R$)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.date.strftime('%d/%m/%Y') }}</td>
+      <td>{{ row.pedidos }}</td>
+      <td>{{ row.unidades }}</td>
+      <td>{{ "%.2f"|format(row.vendas) }}</td>
+      <td>{{ "%.2f"|format(row.taxas_ml) }}</td>
+      <td>{{ "%.2f"|format(row.custo_produto) }}</td>
+      <td>{{ "%.2f"|format(row.ads) }}</td>
+      <td class="{{ 'positive' if row.lucro >= 0 else 'negative' }}">{{ "%.2f"|format(row.lucro) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"><strong>Total do período</strong></td>
+      <td><strong>{{ "%.2f"|format(totals.vendas) }}</strong></td>
+      <td><strong>{{ "%.2f"|format(totals.taxas_ml) }}</strong></td>
+      <td><strong>{{ "%.2f"|format(totals.custo_produto) }}</strong></td>
+      <td><strong>{{ "%.2f"|format(totals.ads) }}</strong></td>
+      <td class="{{ 'positive' if totals.lucro >= 0 else 'negative' }}"><strong>{{ "%.2f"|format(totals.lucro) }}</strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+<h2>Últimos pedidos</h2>
+<table class="report">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Produto</th>
+      <th>SKU</th>
+      <th>Qtd</th>
+      <th>Envio</th>
+      <th>Valor (R$)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+      {% for oi in order.items %}
+      <tr>
+        <td>{{ order.date_created.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ oi.title }}</td>
+        <td>{{ oi.sku or '-' }}</td>
+        <td>{{ oi.quantity }}</td>
+        <td>{{ order.shipping_label }}</td>
+        <td>{{ "%.2f"|format(oi.unit_price * oi.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

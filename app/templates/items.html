@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Meus anúncios</h1>
+<a class="btn" href="/items/new">+ Criar novo anúncio</a>
+
+<table class="report">
+  <thead>
+    <tr><th>Título</th><th>SKU</th><th>Preço (R$)</th><th>Estoque</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.title }}</td>
+      <td>{{ item.seller_custom_field or '-' }}</td>
+      <td>{{ "%.2f"|format(item.price) }}</td>
+      <td>{{ item.available_quantity }}</td>
+      <td>{{ item.status }}</td>
+      <td><a href="/items/{{ item.id }}/edit">editar</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

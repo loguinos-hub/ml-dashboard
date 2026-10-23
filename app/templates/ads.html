@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Investimento em Ads (anúncios patrocinados)</h1>
+<p>Registre manualmente quanto você investiu em publicidade por dia. Esse valor entra no cálculo do lucro diário.</p>
+
+<form method="post" action="/ads" class="form-grid">
+  <label>Data<input type="date" name="spend_date" required></label>
+  <label>Valor investido (R$)<input type="number" step="0.01" name="amount" required></label>
+  <label>Observação (opcional)<input type="text" name="note"></label>
+  <button class="btn" type="submit">Salvar</button>
+</form>
+
+<table class="report">
+  <thead><tr><th>Data</th><th>Valor (R$)</th><th>Observação</th></tr></thead>
+  <tbody>
+    {% for a in ads %}
+    <tr>
+      <td>{{ a.spend_date.strftime('%d/%m/%Y') }}</td>
+      <td>{{ "%.2f"|format(a.amount) }}</td>
+      <td>{{ a.note or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
