@@ -408,7 +408,13 @@ def create_item(
 def edit_item_form(request: Request, item_id: str, db: Session = Depends(get_db)):
     auth = ml_client.get_valid_token(db)
     item = ml_client.get_item(auth.access_token, item_id)
-    return templates.TemplateResponse(request, "item_edit.html", {"item": item})
+    current_sku = item.get("seller_custom_field")
+    cost = None
+    if current_sku:
+        cost_row = db.query(ProductCost).filter(ProductCost.sku == current_sku).first()
+        if cost_row:
+            cost = cost_row.cost_price
+    return templates.TemplateResponse(request, "item_edit.html", {"item": item, "cost": cost})
 
 
 @app.post("/items/{item_id}/edit")
@@ -417,6 +423,7 @@ def edit_item(
     price: float = Form(...),
     available_quantity: int = Form(...),
     sku: str = Form(""),
+    cost_price: str = Form(""),
     db: Session = Depends(get_db),
 ):
     auth = ml_client.get_valid_token(db)
@@ -424,4 +431,14 @@ def edit_item(
     if sku:
         payload["seller_custom_field"] = sku
     ml_client.update_item(auth.access_token, item_id, payload)
+
+    if sku and cost_price.strip():
+        cost_value = float(cost_price)
+        existing = db.query(ProductCost).filter(ProductCost.sku == sku).first()
+        if existing:
+            existing.cost_price = cost_value
+        else:
+            db.add(ProductCost(sku=sku, cost_price=cost_value))
+        db.commit()
+
     return RedirectResponse("/items", status_code=303)
